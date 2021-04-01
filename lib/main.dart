@@ -8,58 +8,44 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+        title: 'flutter example',
+        home: Scaffold(
+            body: Center(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text("Press 'a', Space, Right arrow in android emulator in macos"),
+          _Page(),
+        ]))));
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class _Page extends StatefulWidget {
+  const _Page();
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _PageState createState() => _PageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _PageState extends State<_Page> {
+  final _controller = TextEditingController();
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void correct(String value) {
+    final trimmed = value.trim();
+    if (trimmed != _controller.text) {
+      _controller.text = trimmed;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
+    return TextFormField(
+      controller: _controller,
+      onChanged: correct,
     );
   }
 }
