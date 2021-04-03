@@ -23,11 +23,43 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    test();
+  }
+
+  Stream<int?> stream(Future<void> Function() worker) async* {
+    Stream<int?> work() async* {
+      await worker();
+      yield 3;
+    }
+
+    yield* work();
+  }
+
+  Future<void> sampleWorker() async {
+    throw Error();
+  }
+
+  Future<void> test() async {
+    print('start');
+    try {
+      await for (final v in stream(sampleWorker)) {
+        print(v);
+      }
+      print('point 1');
+    } catch (error, stack) {
+      print(stack);
+    }
+    print('done');
+  }
 
   void _incrementCounter() {
     setState(() {
