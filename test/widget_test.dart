@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bug_report/main.dart';
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:gradient_progress/gradient_progress.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
@@ -26,5 +28,7 @@ void main() {
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+
+    GradientCircularProgressIndicator(radius: 1, gradientColors: []);
   });
 }
