@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kakao_flutter_sdk/auth.dart';
 
 void main() {
   runApp(MyApp());
@@ -29,10 +30,21 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    KakaoContext.clientId = '<kakap_app_key>';
+  }
+
+  void _login() async {
+    final authCode =
+        await AuthCodeClient.instance.requestWithTalk(scopes: ['profile']);
+    final token = await AuthApi.instance.issueAccessToken(authCode);
+    await TokenManager.instance.setToken(token);
+    final secondToken = await TokenManager.instance.getToken();
+    final response =
+        await AuthApi.instance.refreshAccessToken(secondToken.refreshToken!);
+    await TokenManager.instance.setToken(response);
   }
 
   @override
@@ -56,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _login,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ),
