@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   runApp(MyApp());
@@ -7,59 +8,71 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+    return MaterialApp(home: HomePage());
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
-    );
+        backgroundColor: Colors.black,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 300),
+              _TestBox(
+                child: Container(width: 200, height: 200, color: Colors.red),
+              ),
+              SizedBox(height: 800),
+            ],
+          ),
+        ));
+  }
+}
+
+@immutable
+class _TestBox extends SingleChildRenderObjectWidget {
+  const _TestBox({Widget? child}) : super(child: child);
+
+  @override
+  _TestFilter createRenderObject(BuildContext context) {
+    return _TestFilter();
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _TestFilter filter) {
+    filter.markNeedsPaint();
+  }
+}
+
+class _TestFilter extends RenderProxyBox {
+  @override
+  ShaderMaskLayer? get layer => super.layer as ShaderMaskLayer?;
+
+  @override
+  bool get alwaysNeedsCompositing => child != null;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      assert(needsCompositing);
+
+      const color = Colors.black;
+      layer ??= ShaderMaskLayer();
+      layer!
+        ..shader = LinearGradient(
+          colors: [color, color],
+        ).createShader(Rect.fromLTWH(0, 0, 1, 1))
+        ..maskRect = offset & size
+        // The following has no problem.
+        // ..maskRect = (offset & size).inflate(1)
+        ..blendMode = BlendMode.srcIn;
+      context.pushLayer(layer!, super.paint, offset);
+    } else {
+      layer = null;
+    }
   }
 }
