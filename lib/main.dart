@@ -26,13 +26,14 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  late TabController tab;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    tab = TabController(length: 1, vsync: this);
   }
 
   @override
@@ -41,24 +42,26 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+      body: NestedScrollView(
+        headerSliverBuilder: (context, _) {
+          return [
+            SliverToBoxAdapter(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                TabBar(
+                    controller: tab,
+                    isScrollable: true,
+                    indicatorWeight: 4,
+                    labelPadding: EdgeInsets.zero,
+                    tabs: [
+                      Tab(text: 'tab 1'),
+                    ]),
+              ]),
+            )
+          ];
+        },
+        body: TabBarView(controller: tab, children: [
+          Text('asdf'),
+        ]),
       ),
     );
   }
