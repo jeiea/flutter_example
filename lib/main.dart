@@ -1,65 +1,112 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  await Future.delayed(Duration(milliseconds: 1000));
+  runApp(MaterialApp(home: HomePage()));
 }
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
+final client = Dio(
+  BaseOptions(followRedirects: true),
+);
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomePageState extends State<HomePage> {
+  final posts = <Post>[];
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final json =
+          await client.get('https://jsonplaceholder.typicode.com/posts');
+      final delta = await compute(toPosts, json.data);
+      setState(() {
+        posts.addAll(delta);
+      });
     });
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final json =
+          await client.get('https://jsonplaceholder.typicode.com/posts');
+      final delta = await compute(toPosts, json.data);
+      setState(() {
+        posts.addAll(delta);
+      });
+    });
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final json =
+          await client.get('https://jsonplaceholder.typicode.com/posts');
+      final delta = await compute(toPosts, json.data);
+      setState(() {
+        posts.addAll(delta);
+      });
+    });
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final json =
+          await client.get('https://jsonplaceholder.typicode.com/posts');
+      final delta = await compute(toPosts, json.data);
+      setState(() {
+        posts.addAll(delta);
+      });
+    });
+    SchedulerBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final json =
+          await client.get('https://jsonplaceholder.typicode.com/posts');
+      final delta = await compute(toPosts, json.data);
+      setState(() {
+        posts.addAll(delta);
+      });
+    });
+  }
+
+  void unusedBreak() {
+    return;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
+        body: SingleChildScrollView(
+      child: Column(
+        children: [
+          ...posts.map((post) => Text(post.title)),
+        ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
-    );
+    ));
   }
+}
+
+class Post {
+  Post({
+    required this.userId,
+    required this.id,
+    required this.title,
+    required this.body,
+  });
+
+  int userId;
+  int id;
+  String title;
+  String body;
+}
+
+List<Post> toPosts(dynamic json) {
+  return List.from(json.map(toPost));
+}
+
+Post toPost(dynamic json) {
+  return Post(
+    body: json['body'],
+    userId: json['userId'],
+    id: json['id'],
+    title: json['title'],
+  );
 }
