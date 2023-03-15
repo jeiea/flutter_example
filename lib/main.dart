@@ -1,7 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'main.g.dart';
+
+@riverpod
+int other(OtherRef ref) {
+  return 3;
+}
+
+@riverpod
+class Something extends _$Something {
+  @override
+  Future<int> build() async {
+    ref.watch(otherProvider);
+    return 0;
+  }
+
+  void increase() {
+    state = AsyncValue.data(state.asData!.value + 1);
+  }
+}
 
 void main() {
-  runApp(MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -12,53 +35,41 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MainPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+class MainPage extends HookConsumerWidget {
+  const MainPage({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(somethingProvider);
+    final count = state.valueOrNull;
+    final notifier = ref.watch(somethingProvider.notifier);
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+    useEffect(() {
+      () async {
+        await Future.delayed(Duration(seconds: 1));
+        ref.read(somethingProvider.notifier).increase();
+      }();
+      return () {
+        print('disposed');
+      };
+    }, const []);
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('$count'),
+          ElevatedButton(
+            onPressed: notifier.increase,
+            child: Text('Up'),
+          ),
+        ],
       ),
     );
   }
