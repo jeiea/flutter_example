@@ -1,10 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'main.g.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -12,54 +21,47 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Scaffold(
+        body: MyWidget(),
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
+@riverpod
+Future<int> data(DataRef ref) async {
+  await Future.delayed(Duration(seconds: 1));
+  return 1;
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+@riverpod
+Future<int> data2(Data2Ref ref) async {
+  await Future.delayed(Duration(milliseconds: 500));
+  return 2;
+}
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+@riverpod
+Future<List<AsyncValue<int>>> data3(Data3Ref ref) async {
+  final one = ref.watch(dataProvider);
+  final two = ref.watch(data2Provider);
+  return [one, two];
+}
 
+class MyWidget extends HookConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = ref.watch(data3Provider);
+    return Container(
+      alignment: Alignment.center,
+      child: Column(children: [
+        Text('$value'),
+        ElevatedButton(
+          onPressed: () {
+            ref.invalidate(dataProvider);
+          },
+          child: Text('Reload'),
+        )
+      ]),
     );
   }
 }
