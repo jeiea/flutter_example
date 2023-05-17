@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+enum A { a, b }
+
+void a() {
+  switch (A.a) {}
+}
+
 void main() {
   runApp(MyApp());
 }
