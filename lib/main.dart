@@ -29,9 +29,9 @@ class MyApp extends StatelessWidget {
 }
 
 @riverpod
-Future<int> data(DataRef ref) async {
+Future<(int,)> data(DataRef ref) async {
   await Future.delayed(Duration(seconds: 1));
-  return 1;
+  return (1,);
 }
 
 @riverpod
