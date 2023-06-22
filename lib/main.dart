@@ -1,9 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+part 'main.freezed.dart';
 part 'main.g.dart';
 
 void main() {
@@ -28,37 +28,39 @@ class MyApp extends StatelessWidget {
   }
 }
 
-@riverpod
-Future<int> data(DataRef ref) async {
-  await Future.delayed(Duration(seconds: 1));
-  return 1;
+@freezed
+sealed class Video with _$Video {
+  const factory Video.url(Uri uri) = IvsUri;
+  const factory Video.vod(String id, {num? episodeId}) = VodId;
+
+  const Video._();
 }
 
 @riverpod
-Future<int> data2(Data2Ref ref) async {
-  await Future.delayed(Duration(milliseconds: 500));
-  return 2;
+int some(SomeRef ref, VodId vodOrEpisode) {
+  return 3;
 }
 
 @riverpod
-Future<List<AsyncValue<int>>> data3(Data3Ref ref) async {
-  final one = ref.watch(dataProvider);
-  final two = ref.watch(data2Provider);
-  return [one, two];
+class Another extends _$Another {
+  @override
+  int build(VodId vodOrEpisode) {
+    return 3;
+  }
 }
 
 class MyWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(data3Provider);
+    ref.watch(someProvider(VodId('', episodeId: 2)));
+    ref.watch(anotherProvider(VodId('', episodeId: 2)));
+
     return Container(
       alignment: Alignment.center,
       child: Column(children: [
-        Text('$value'),
+        Text(''),
         ElevatedButton(
-          onPressed: () {
-            ref.invalidate(dataProvider);
-          },
+          onPressed: () {},
           child: Text('Reload'),
         )
       ]),
